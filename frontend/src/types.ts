@@ -1,8 +1,16 @@
 export type LookupItem = { id: string; name: string };
+export type InformPersonGroup = "Customer" | "Production" | "Administration";
+
+export type InformPerson = {
+  id: string;
+  name: string;
+  email: string;
+  group: InformPersonGroup;
+};
 
 export type CurrentUser = {
   id: string;
-  mainGroup: "Customer" | "Production" | "Administration";
+  mainGroup: InformPersonGroup;
   organization: string;
   group: string;
   subgroup: string;

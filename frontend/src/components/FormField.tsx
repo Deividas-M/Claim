@@ -11,7 +11,7 @@ export function FormField({
 }) {
   if (!asLabel) {
     return (
-      <div className="field">
+      <div className="grid gap-1.5 text-xs">
         <span>{label}</span>
         {children}
       </div>
@@ -19,7 +19,7 @@ export function FormField({
   }
 
   return (
-    <label className="field">
+    <label className="grid gap-1.5 text-xs">
       <span>{label}</span>
       {children}
     </label>

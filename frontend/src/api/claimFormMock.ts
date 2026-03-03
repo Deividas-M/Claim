@@ -1,14 +1,9 @@
-import type { CurrentUser, LookupItem } from "../types";
+import type { CurrentUser, InformPerson, LookupItem } from "../types";
 
 export type ClaimFormLookups = {
   users: CurrentUser[];
   claimTypes: LookupItem[];
-  informPersons: Array<{
-    id: string;
-    name: string;
-    email: string;
-    group: "Customer" | "Production" | "Administration";
-  }>;
+  informPersons: InformPerson[];
   customerImprovementCategories: LookupItem[];
   staffImprovementCategories: LookupItem[];
   replacementPartSerials: Array<{

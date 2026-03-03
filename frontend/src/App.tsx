@@ -3,6 +3,9 @@ import { useEffect, useMemo, useState } from "react";
 import { getClaimFormLookups } from "./api/claimFormDataSource";
 import { ClaimForm } from "./components/ClaimForm";
 import { ClaimsMonitor } from "./components/ClaimsMonitor";
+import { Button } from "./components/ui/Button";
+import { Card } from "./components/ui/Card";
+import { Dialog } from "./components/ui/Dialog";
 import type { ClaimRecord, CurrentUser } from "./types";
 
 type Lookups = Awaited<ReturnType<typeof getClaimFormLookups>>;
@@ -44,12 +47,12 @@ export function App() {
   );
 
   return (
-    <main className="page">
-      <section className="panel">
-        <div className="app-head">
+    <main className="mx-auto grid w-full max-w-[1080px] gap-3.5 p-5">
+      <Card>
+        <div className="flex items-end justify-between gap-3 max-[900px]:flex-col max-[900px]:items-stretch">
           <h1>Claim Registration</h1>
-          <div className="app-head-actions">
-            <label className="field user-switch">
+          <div className="flex items-end gap-2.5 max-[900px]:flex-col max-[900px]:items-stretch">
+            <label className="grid min-w-[260px] gap-1.5 text-xs max-[900px]:min-w-0">
               <span>User</span>
               <select value={selectedUserId} onChange={(e) => setSelectedUserId(e.target.value)}>
                 {users.map((u) => (
@@ -59,43 +62,33 @@ export function App() {
                 ))}
               </select>
             </label>
-            <button
+            <Button
               type="button"
-              className="new-claim-btn"
+              className="w-auto whitespace-nowrap"
               onClick={() => setIsNewClaimOpen(true)}
               disabled={!selectedUser}
             >
               New claim
-            </button>
+            </Button>
           </div>
         </div>
-        <p className="muted">Stage 1 claim form (mock data source)</p>
-      </section>
-      {isNewClaimOpen ? (
-        <div className="modal-overlay claim-modal-overlay" onClick={() => setIsNewClaimOpen(false)}>
-          <div
-            className="modal claim-modal"
-            onClick={(e) => e.stopPropagation()}
-            role="dialog"
-            aria-modal="true"
-            aria-label="New claim form"
-          >
-            <div className="modal-head">
-              <h3>New claim</h3>
-              <button type="button" className="close-btn" onClick={() => setIsNewClaimOpen(false)}>
-                Close
-              </button>
-            </div>
-            <ClaimForm
-              selectedUser={selectedUser}
-              onClaimCreated={(claim) => {
-                setClaims((prev) => [claim, ...prev]);
-                setIsNewClaimOpen(false);
-              }}
-            />
-          </div>
-        </div>
-      ) : null}
+        <p className="text-xs text-slate-500">Stage 1 claim form (mock data source)</p>
+      </Card>
+      <Dialog
+        open={isNewClaimOpen}
+        onClose={() => setIsNewClaimOpen(false)}
+        title="New claim"
+        className="max-w-[1180px] max-h-[calc(100vh-24px)] overflow-auto"
+        closeOnOverlayClick={false}
+      >
+        <ClaimForm
+          selectedUser={selectedUser}
+          onClaimCreated={(claim) => {
+            setClaims((prev) => [claim, ...prev]);
+            setIsNewClaimOpen(false);
+          }}
+        />
+      </Dialog>
       {lookups ? (
         <ClaimsMonitor
           claims={claims}

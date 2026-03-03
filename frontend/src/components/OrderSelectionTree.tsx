@@ -21,9 +21,9 @@ export function OrderSelectionTree({
   onChange,
 }: Props) {
   return (
-    <section className="subpanel stack">
+    <section className="grid gap-3 rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
       <h3>Choose your order</h3>
-      <div className="grid three">
+      <div className="grid gap-2.5 md:grid-cols-3">
         <FormField label="Order">
           <input
             type="search"

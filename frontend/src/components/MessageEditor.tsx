@@ -12,6 +12,7 @@ import { ListPlugin } from "@lexical/react/LexicalListPlugin";
 import { TOGGLE_LINK_COMMAND, LinkNode, $isLinkNode } from "@lexical/link";
 import { ListItemNode, ListNode } from "@lexical/list";
 import { $patchStyleText, $getSelectionStyleValueForProperty } from "@lexical/selection";
+import { Link2 } from "lucide-react";
 import {
   $insertNodes,
   $getNearestNodeFromDOMNode,
@@ -35,6 +36,7 @@ type Props = {
   value: string;
   onChange: (nextStateJson: string, hasContent: boolean) => void;
   asPanel?: boolean;
+  readOnly?: boolean;
 };
 
 type ToolbarState = {
@@ -69,7 +71,7 @@ function extractStyleValue(style: string, key: string): string | null {
   return match ? match[1].trim() : null;
 }
 
-function MessageEditorInner({ value, onChange, placeholder }: Omit<Props, "title" | "label" | "asPanel">) {
+function MessageEditorInner({ value, onChange, placeholder, readOnly = false }: Omit<Props, "title" | "label" | "asPanel">) {
   const initialConfig = {
     namespace: "ClaimMessageEditor",
     theme,
@@ -83,31 +85,33 @@ function MessageEditorInner({ value, onChange, placeholder }: Omit<Props, "title
   return (
     <LexicalComposer initialConfig={initialConfig}>
       <div className="editor-shell">
-        <FloatingOutlookToolbarPlugin />
-        <PasteImagePlugin />
-        <DragDropImagePlugin />
+        {readOnly ? null : <FloatingOutlookToolbarPlugin />}
+        {readOnly ? null : <PasteImagePlugin />}
+        {readOnly ? null : <DragDropImagePlugin />}
         <RichTextPlugin
-          contentEditable={<ContentEditable className="editor-input" />}
+          contentEditable={<ContentEditable className="editor-input" contentEditable={!readOnly} />}
           placeholder={<div className="editor-placeholder">{placeholder}</div>}
           ErrorBoundary={LexicalErrorBoundary}
         />
         <HistoryPlugin />
         <ListPlugin />
         <LinkPlugin />
-        <OnChangePlugin
-          onChange={(editorState) => {
-            const json = JSON.stringify(editorState.toJSON());
-            let hasContent = false;
-            editorState.read(() => {
-              const text = $getRoot().getTextContent().trim();
-              const hasImage = $getRoot()
-                .getChildren()
-                .some((node) => node.getType() === "image");
-              hasContent = Boolean(text || hasImage);
-            });
-            onChange(json, hasContent);
-          }}
-        />
+        {readOnly ? null : (
+          <OnChangePlugin
+            onChange={(editorState) => {
+              const json = JSON.stringify(editorState.toJSON());
+              let hasContent = false;
+              editorState.read(() => {
+                const text = $getRoot().getTextContent().trim();
+                const hasImage = $getRoot()
+                  .getChildren()
+                  .some((node) => node.getType() === "image");
+                hasContent = Boolean(text || hasImage);
+              });
+              onChange(json, hasContent);
+            }}
+          />
+        )}
       </div>
     </LexicalComposer>
   );
@@ -267,7 +271,7 @@ function FloatingOutlookToolbarPlugin() {
       <button type="button" className={`icon-btn ${state.italic ? "active" : ""}`} title="Italic" onMouseDown={(e) => e.preventDefault()} onClick={() => onFormat("italic")}><span className="ico-italic">I</span></button>
       <button type="button" className={`icon-btn ${state.underline ? "active" : ""}`} title="Underline" onMouseDown={(e) => e.preventDefault()} onClick={() => onFormat("underline")}><span className="ico-underline">U</span></button>
       <button type="button" className={`icon-btn ${state.strikethrough ? "active" : ""}`} title="Strikethrough" onMouseDown={(e) => e.preventDefault()} onClick={() => onFormat("strikethrough")}><span className="ico-strike">S</span></button>
-      <button type="button" className={`icon-btn ${state.isLink ? "active" : ""}`} title="Link" onMouseDown={(e) => e.preventDefault()} onClick={onToggleLink}>🔗</button>
+      <button type="button" className={`icon-btn ${state.isLink ? "active" : ""}`} title="Link" onMouseDown={(e) => e.preventDefault()} onClick={onToggleLink}><Link2 size={14} /></button>
       <select className="mini-select" value={state.fontSize} title="Font size" onChange={(e) => onFontSize(e.target.value)}>
         <option value="12px">12</option>
         <option value="14px">14</option>
@@ -388,6 +392,7 @@ function DragDropImagePlugin() {
 
 export function MessageEditor({
   asPanel = true,
+  readOnly = false,
   title,
   label,
   placeholder,
@@ -398,16 +403,20 @@ export function MessageEditor({
     <>
       <h3>{title}</h3>
       <FormField label={label} asLabel={false}>
-        <MessageEditorInner value={value} onChange={onChange} placeholder={placeholder} />
+        <MessageEditorInner value={value} onChange={onChange} placeholder={placeholder} readOnly={readOnly} />
       </FormField>
-      <FormField label="Add files (optional)">
-        <input type="file" multiple />
-      </FormField>
+      {readOnly ? null : (
+        <FormField label="Add files (optional)">
+          <input type="file" multiple />
+        </FormField>
+      )}
     </>
   );
 
   if (asPanel) {
-    return <section className="subpanel stack">{body}</section>;
+    return <section className="grid gap-3 rounded-lg border border-slate-200 bg-white p-4 shadow-sm">{body}</section>;
   }
-  return <div className="stack">{body}</div>;
+  return <div className="grid gap-3">{body}</div>;
 }
+
+
